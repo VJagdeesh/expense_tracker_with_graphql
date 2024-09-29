@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 const userResolver = {
   Query: {
-    authUser: async (_, _, context) => {
+    authUser: async (_, __, context) => {
       try {
         const user = await context.getUser();
         return user;
@@ -23,11 +23,11 @@ const userResolver = {
     },
   },
   Mutation: {
-    signUp: async (_, { user }, context) => {
+    signUp: async (_, { input }, context) => {
       try {
-        const { username, password, gender, name } = user;
+        const { username, password, gender, name } = input;
         if (!username || !password || !gender || !name) {
-          throw new Error("All fields are required!");
+          throw new Error("All fields are required! ");
         }
         const existingUser = await User.findOne({ username });
         if (existingUser) {
@@ -39,6 +39,7 @@ const userResolver = {
         const girlsProfilePick = `https://avatar-placeholder.iran.liara.run/public/girl?username=${username}`;
         const newUser = new User({
           username,
+          name,
           password: hashedPassword,
           gender,
           profilePicture:
@@ -52,9 +53,9 @@ const userResolver = {
         throw new Error(err.message || "Internal Server Error");
       }
     },
-    login: async (_, { user }, context) => {
+    login: async (_, { input }, context) => {
       try {
-        const { username, password } = user;
+        const { username, password } = input;
         const { user } = await context.authenticate("graphql-local", {
           username,
           password,
@@ -66,13 +67,13 @@ const userResolver = {
         throw new Error(err.message || "Internal Server Error");
       }
     },
-    logout: async (_, _, context) => {
+    logout: async (_, __, context) => {
       try {
         await context.logout();
-        req.session.destroy((err) => {
+        context.req.session.destroy((err) => {
           if (err) throw err;
         });
-        res.clearCookie("connect.sid");
+        context.res.clearCookie("connect.sid");
         return { message: "Logged out successfully" };
       } catch (err) {
         console.log(err);

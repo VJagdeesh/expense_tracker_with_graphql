@@ -5,10 +5,16 @@ import Cards from "../components/Cards";
 import TransactionForm from "../components/TransactionForm";
 
 import { MdLogout } from "react-icons/md";
+import { useMutation } from "@apollo/client";
+import { LOGOUT } from "../graphql/mutations/user.mutation";
+import toast from "react-hot-toast";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const HomePage = () => {
+  const [logout, { loading }] = useMutation(LOGOUT, {
+    refetchQueries: ["GetAuthenticatedUser"],
+  });
   const chartData = {
     labels: ["Saving", "Expense", "Investment"],
     datasets: [
@@ -33,11 +39,14 @@ const HomePage = () => {
     ],
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      toast.error(err.message);
+    }
     console.log("Logging out...");
   };
-
-  const loading = false;
 
   return (
     <>
