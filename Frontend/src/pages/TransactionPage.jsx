@@ -40,7 +40,7 @@ const TransactionPage = () => {
         },
       });
       toast.success("Transaction updated successfully");
-      navigate("/");
+      navigate(`/transaction/${id}`);
     } catch (err) {
       toast.error(err.message);
     }

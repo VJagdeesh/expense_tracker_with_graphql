@@ -1,6 +1,7 @@
 import { users } from "../dummydata/data.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import Transaction from "../models/transaction.model.js";
 const userResolver = {
   Query: {
     authUser: async (_, __, context) => {
@@ -14,7 +15,7 @@ const userResolver = {
     },
     user: async (_, { userId }) => {
       try {
-        const user = await User.findById({ userId });
+        const user = await User.findById(userId);
         return user;
       } catch (err) {
         console.log(err);
@@ -35,8 +36,8 @@ const userResolver = {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const boysProfilePick = `https://avatar-placeholder.iran.liara.run/public/boy?username=${username}`;
-        const girlsProfilePick = `https://avatar-placeholder.iran.liara.run/public/girl?username=${username}`;
+        const boysProfilePick = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+        const girlsProfilePick = `https://avatar.iran.liara.run/public/girl?username=${username}`;
         const newUser = new User({
           username,
           name,
@@ -78,6 +79,17 @@ const userResolver = {
       } catch (err) {
         console.log(err);
         throw new Error(err.message || "Internal Server Error");
+      }
+    },
+  },
+  User: {
+    transactions: async (parent) => {
+      try {
+        const transactions = await Transaction.find({ userId: parent._id });
+        return transactions;
+      } catch (err) {
+        console.log(err);
+        throw new Error(err.message || "Error fetching transactions");
       }
     },
   },
