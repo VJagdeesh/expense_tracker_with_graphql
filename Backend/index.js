@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import passport from "passport";
 import session from "express-session";
 import connectMongo from "connect-mongodb-session";
@@ -16,6 +17,7 @@ import { configurePassport } from "./passport/passport.config.js";
 
 dotenv.config();
 configurePassport();
+const __dirname = path.resolve();
 // Required logic for integrating with Express
 const app = express();
 // Our httpServer handles incoming requests to our Express app.
@@ -70,6 +72,12 @@ app.use(
     context: async ({ req, res }) => buildContext({ req, res }),
   })
 );
+
+app.use(express.static(path.join(__dirname, "Frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "Frontend/dist", "index.html"));
+});
 
 // Modified server startup
 await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
